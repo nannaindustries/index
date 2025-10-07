@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>NANNA Industries</title>
+    <meta name="theme-color" content="#FFFFFF" />
+    <style>
+      :root {
+        --bg: #ffffff;
+        --ink: #151515;
+        --footer-bg: #151515;
+        --footer-ink: #c1c1c1;
+        --footer-head: #909090;
+        --divider: #e3e3e3;
+
+        /* Globala sidmarginaler (container) */
+        --side-pad: clamp(20px, 3.9vw, 39px);
+        --header-h: 70px;
+        --content-max: 100%;
+        --headline-size: clamp(32px, 6vw, 64px);
+        --lead-size: clamp(16px, 2.2vw, 20px);
+        --about-top-gap: 90px; /* används på desktop, justeras för mobil nedan */
+        --about-lead-bottom: 64px;
+        --radius: 0;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-padding-top: calc(
+          var(--header-h) + env(safe-area-inset-top, 0px)
+        );
+        background: var(--bg);
+      }
+      body {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-weight: 400;
+        letter-spacing: -0.04em;
+        line-height: 1.6;
+        color: var(--ink);
+        background: var(--bg);
+        min-height: 100%;
+        cursor: none;
+      }
+      h1,
+      h2,
+      h3,
+      p,
+      a,
+      small {
+        font: inherit;
+        font-weight: 400;
+        letter-spacing: -0.04em;
+        text-align: left;
+        color: var(--ink);
+      }
+      img,
+      video {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      /* ENDA platsen som sätter sidmarginalerna för innehåll */
+      .container {
+        width: 100%;
+        max-width: var(--content-max);
+        margin: 0 auto;
+        padding-left: var(--side-pad);
+        padding-right: var(--side-pad);
+      }
+
+      /* Sektioner: bara topp/botten-padding; sidmarginalerna kommer från .container */
+      section {
+        padding-top: clamp(56px, 11vw, 160px);
+        padding-bottom: clamp(56px, 11vw, 160px);
+        background: var(--bg);
+        position: relative; /* för ::after-linjen */
+      }
+
+      /* Avdelarlinjen följer containerns sidmarginaler (matchar bilderna) */
+      section::after {
+        content: "";
+        position: absolute;
+        left: var(--side-pad);
+        right: var(--side-pad);
+        bottom: 0;
+        height: 1px;
+        background: var(--divider);
+      }
+
+      /* Header */
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: var(--bg);
+        height: var(--header-h);
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid var(--divider); /* fullbredd (ska inte kortas) */
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        max-width: var(--content-max);
+        margin: 0 auto;
+        padding: 10px var(--side-pad);
+      }
+      .brand {
+        display: block;
+        width: 170px;
+        height: 35px;
+      }
+      .brand img {
+        height: 35px;
+        width: auto;
+      }
+      nav {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+      }
+      nav ul {
+        list-style: none;
+        display: flex;
+        gap: 12px;
+        margin: 0;
+      }
+      nav a {
+        color: var(--ink);
+      }
+      nav a:hover {
+        text-decoration: underline;
+      }
+
+      .hamburger {
+        display: none;
+        background: transparent;
+        border: 0;
+        width: 40px;
+        height: 40px;
+        position: relative;
+        cursor: none;
+      }
+      .hamburger::before,
+      .hamburger::after {
+        content: "";
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        height: 2px;
+        background: var(--ink);
+        transition: transform 0.2s ease, top 0.2s ease;
+      }
+      .hamburger::before {
+        top: 13px;
+      }
+      .hamburger::after {
+        top: 25px;
+      }
+      .hamburger[aria-expanded="true"]::before {
+        top: 19px;
+        transform: rotate(45deg);
+      }
+      .hamburger[aria-expanded="true"]::after {
+        top: 19px;
+        transform: rotate(-45deg);
+      }
+
+      .mobile-menu {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: var(--header-h);
+        height: calc(100vh - var(--header-h));
+        background: var(--bg);
+        transform: translateY(-12px);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+        padding: 20px var(--side-pad);
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        z-index: 999;
+        border-top: 1px solid var(--divider);
+      }
+      .mobile-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .mobile-menu a {
+        font-size: clamp(24px, 6vw, 36px);
+        color: var(--ink);
+      }
+      .mobile-menu a:hover {
+        text-decoration: underline;
+      }
+
+      /* HERO: topp/botten = sidmarginalerna, sektionen fyller skärmen under headern */
+      .hero {
+        background: var(--bg);
+        padding-top: var(--side-pad);
+        padding-bottom: var(--side-pad);
+        height: calc(100vh - var(--header-h));
+      }
+      @supports (height: 100svh) {
+        .hero {
+          height: calc(100svh - var(--header-h));
+        }
+      }
+      .hero .container {
+        position: relative;
+        padding-left: var(--side-pad);
+        padding-right: var(--side-pad);
+      }
+      .hero-box {
+        position: relative;
+        height: calc(100vh - var(--header-h) - (var(--side-pad) * 2));
+        border: 1px solid var(--divider);
+        border-radius: 0;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      @supports (height: 100svh) {
+        .hero-box {
+          height: calc(100svh - var(--header-h) - (var(--side-pad) * 2));
+        }
+      }
+      .hero-video {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: var(--bg);
+        position: relative;
+      }
+      .hero-video video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        text-align: left;
+        padding-left: var(--side-pad);
+        padding-right: var(--side-pad);
+      }
+      .hero-overlay h1 {
+        color: #ffffff;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        font-size: clamp(28px, 5.4vw, 56px);
+        margin-bottom: clamp(10px, 2vw, 14px);
+      }
+      .hero-overlay h1 span {
+        display: block;
+      }
+      .hero-overlay p {
+        color: #ffffff;
+        font-size: clamp(14px, 2.4vw, 18px);
+        opacity: 0.95;
+      }
+
+      /* Sektioners layout */
+      .section-grid {
+        display: grid;
+        gap: clamp(12px, 2vw, 24px);
+        grid-template-columns: 1fr;
+        align-items: center;
+      }
+      .section-grid .text {
+        order: 1;
+      }
+      .section-grid .media {
+        order: 2;
+      }
+      .section-grid .media img {
+        width: 100%;
+        height: auto;
+        border-radius: 0;
+        display: block;
+      }
+      @media (min-width: 900px) {
+        .section-grid {
+          grid-template-columns: 1.07fr 0.93fr;
+        }
+        .about-grid .text {
+          order: 1;
+          padding-right: 2.5%;
+        }
+        .about-grid .media {
+          order: 2;
+        }
+        .philo-grid .media {
+          order: 1;
+        }
+        .philo-grid .text {
+          order: 2;
+          padding-left: 2.5%;
+        }
+        .focus-grid .text {
+          order: 1;
+          padding-right: 2.5%;
+        }
+        .focus-grid .media {
+          order: 2;
+        }
+        .legacy-grid .media {
+          order: 1;
+        }
+        .legacy-grid .text {
+          order: 2;
+          padding-left: 2.5%;
+        }
+      }
+
+      /* Typografi */
+      #about .about-title {
+        font-size: var(--headline-size);
+        line-height: 1.1;
+        margin-top: var(--about-top-gap);
+        margin-bottom: 12px;
+      }
+      #about .about-title span {
+        display: block;
+      }
+      #about .about-lead {
+        font-size: var(--lead-size);
+        max-width: 80ch;
+        margin-bottom: var(--about-lead-bottom);
+      }
+      .section-title {
+        font-size: clamp(28px, 5vw, 48px);
+        margin-bottom: 12px;
+      }
+      .lead {
+        font-size: var(--lead-size);
+        max-width: 80ch;
+      }
+      .focus-list {
+        list-style: disc;
+        margin-left: 1.25rem;
+        font-size: var(--lead-size);
+        line-height: 1.35;
+      }
+      .focus-list li {
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Footer / Contact: med .container för identiska sidmarginaler */
+      .site-footer {
+        background: var(--footer-bg);
+        color: var(--footer-ink);
+        /* nedskalad höjd (~-33% mot tidigare större variant) */
+        padding-top: calc(clamp(48px, 10vw, 144px) * 1.2);
+        padding-bottom: calc(clamp(48px, 10vw, 144px) * 1.2);
+      }
+      .site-footer h3 {
+        color: var(--footer-head);
+        font-size: clamp(28px, 5vw, 48px);
+        margin-bottom: 10px;
+      }
+      .site-footer p,
+      .site-footer a {
+        color: var(--footer-ink);
+        font-size: var(--lead-size);
+        text-decoration: none;
+      }
+      .site-footer a:hover {
+        text-decoration: underline;
+      }
+      .site-footer .legal {
+        margin-top: 14px;
+        font-size: var(--lead-size);
+        color: #9a9a9a;
+        text-align: left;
+      }
+
+      /* Cursor */
+      .cursor {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #c079f0;
+        transform: translate(-50%, -50%) scale(1);
+        transition: transform 0.15s ease, opacity 0.25s ease;
+        pointer-events: none;
+        z-index: 10000;
+        opacity: 1;
+      }
+      .cursor.active {
+        transform: translate(-50%, -50%) scale(2.2);
+      }
+      a,
+      button,
+      .brand,
+      .hamburger {
+        cursor: none;
+      }
+
+      /* ===== MOBILJUSTERINGAR ===== */
+      @media (pointer: coarse) {
+        body {
+          cursor: auto;
+        }
+        .cursor {
+          display: none !important;
+        }
+        a,
+        button,
+        .brand,
+        .hamburger {
+          cursor: auto;
+        }
+      }
+      @media (max-width: 768px) {
+        nav {
+          display: none;
+        }
+        .hamburger {
+          display: block;
+          margin-left: auto;
+        }
+
+        /* Ta bort extra toppgap över "About" så den matchar andra rubriker */
+        #about .about-title {
+          margin-top: 0;
+        }
+
+        /* Mobil: extra generös footer (tidigare önskemål 3×, här satt till *4) */
+        .site-footer {
+          padding-top: calc(clamp(48px, 10vw, 144px) * 5.5);
+          padding-bottom: calc(clamp(48px, 10vw, 144px) * 5.5);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Anchor högst upp så loggan kan scrolla hit -->
+    <div id="top"></div>
+
+    <header class="site-header" id="siteHeader">
+      <div class="nav">
+        <a href="#top" class="brand" aria-label="Go to top">
+          <img src="logo.png" alt="NANNA Industries" />
+        </a>
+        <nav aria-label="Main menu">
+          <ul>
+            <li><a href="#about">About</a></li>
+            <li><a href="#philosophy">Philosophy</a></li>
+            <li><a href="#focus">Focus</a></li>
+            <li><a href="#legacy">Legacy</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </nav>
+        <button
+          class="hamburger"
+          id="hamburger"
+          aria-controls="mobileMenu"
+          aria-expanded="false"
+          aria-label="Open menu"
+        ></button>
+      </div>
+      <div
+        class="mobile-menu"
+        id="mobileMenu"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile menu"
+      >
+        <a href="#about">About</a>
+        <a href="#philosophy">Philosophy</a>
+        <a href="#focus">Focus</a>
+        <a href="#legacy">Legacy</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero" aria-label="Intro">
+      <div class="container">
+        <div class="hero-box">
+          <div class="hero-video">
+            <video autoplay muted loop playsinline>
+              <source src="hero.mp4" type="video/mp4" />
+            </video>
+          </div>
+          <div class="hero-overlay" aria-hidden="true">
+            <div>
+              <h1>
+                <span>Permanent capital.</span>
+                <span>Long-term partnerships.</span>
+                <span>Sustainable growth.</span>
+              </h1>
+              <p>We invest in unlisted companies with enduring potential.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section id="about">
+      <div class="container section-grid about-grid">
+        <div class="text">
+          <h2 class="about-title"><span>About</span></h2>
+          <p class="about-lead">
+            NANNA Industries is a privately held investment company focused on
+            acquiring, owning, and developing unlisted businesses. We believe in
+            the power of long-term ownership — in building companies patiently,
+            sustainably, and with integrity. Our purpose is to create enduring
+            value by combining industrial expertise with human understanding.
+          </p>
+        </div>
+        <div class="media">
+          <img src="about.jpg" alt="NANNA Industries — About" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Philosophy -->
+    <section id="philosophy">
+      <div class="container section-grid philo-grid">
+        <div class="media">
+          <img src="philosophy.jpg" alt="Our Philosophy" />
+        </div>
+        <div class="text">
+          <h2 class="section-title">Our Philosophy</h2>
+          <p class="lead">
+            We invest in companies with strong fundamentals, capable leadership,
+            and a clear potential to grow over time. Our role as owner is to
+            provide stability, strategic perspective, and capital — while
+            safeguarding the independence and entrepreneurial spirit of each
+            company.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Focus -->
+    <section id="focus">
+      <div class="container section-grid focus-grid">
+        <div class="text">
+          <h2 class="section-title">Focus</h2>
+          <p class="lead" style="margin-bottom: 12px">
+            NANNA Industries focuses on unlisted companies in sectors
+            characterized by structural strength and long-term relevance:
+          </p>
+          <ul class="focus-list">
+            <li>Industrial and technical services</li>
+            <li>Healthcare and life sciences</li>
+            <li>Specialized manufacturing</li>
+            <li>Sustainable infrastructure and energy</li>
+          </ul>
+          <p class="lead" style="margin-top: 16px">
+            Our investments are typically majority-owned and developed in close
+            collaboration with management.
+          </p>
+        </div>
+        <div class="media"><img src="focus.jpg" alt="Sector Focus" /></div>
+      </div>
+    </section>
+
+    <!-- Legacy -->
+    <section id="legacy">
+      <div class="container section-grid legacy-grid">
+        <div class="media"><img src="legacy.jpg" alt="Legacy" /></div>
+        <div class="text">
+          <h2 class="section-title">Legacy</h2>
+          <p class="lead">
+            The name <em>NANNA</em> carries a family legacy — a reminder that
+            all meaningful progress is built on care, patience, and continuity.
+            Our mission is to ensure that this spirit lives on in the companies
+            we build and the people we work with.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer / Contact -->
+    <footer class="site-footer" id="contact">
+      <div class="container">
+        <div class="grid">
+          <div>
+            <h3>Contact</h3>
+            <p>NANNA Industries</p>
+            <p>Stockholm, Sweden</p>
+            <p>
+              <a href="mailto:info@nannaindustries.com"
+                >info@nannaindustries.com</a
+              >
+            </p>
+          </div>
+        </div>
+        <p class="legal">
+          © <span id="yr"></span> NANNA Industries. All rights reserved.
+        </p>
+      </div>
+    </footer>
+
+    <!-- Custom cursor -->
+    <div class="cursor" id="cursor"></div>
+
+    <script>
+      // År i foten
+      document.getElementById("yr").textContent = new Date().getFullYear();
+
+      // Custom cursor (enkel variant + hover-zoom på länkar/knappar/logo)
+      const isFinePointer = window.matchMedia("(pointer: fine)").matches;
+      const cursor = document.getElementById("cursor");
+      if (isFinePointer && cursor) {
+        const activate = () => cursor.classList.add("active");
+        const deactivate = () => cursor.classList.remove("active");
+
+        document.addEventListener("mousemove", (e) => {
+          cursor.style.left = e.clientX + "px";
+          cursor.style.top = e.clientY + "px";
+          cursor.style.opacity = "1";
+        });
+
+        document.addEventListener("mouseover", (e) => {
+          const t = e.target.closest(
+            'a, button, [role="button"], .brand, .hamburger'
+          );
+          t ? activate() : deactivate();
+        });
+        document.addEventListener("mouseout", (e) => {
+          const toEl =
+            e.relatedTarget && e.relatedTarget.closest
+              ? e.relatedTarget.closest(
+                  'a, button, [role="button"], .brand, .hamburger'
+                )
+              : null;
+          if (!toEl) deactivate();
+        });
+
+        document.addEventListener("mouseleave", () => {
+          cursor.style.opacity = "0";
+        });
+        document.addEventListener("mouseenter", () => {
+          cursor.style.opacity = "1";
+        });
+      } else if (cursor) {
+        cursor.style.display = "none";
+      }
+
+      // Mobilmeny
+      const hamburger = document.getElementById("hamburger");
+      const mobileMenu = document.getElementById("mobileMenu");
+      function toggleMobileMenu(forceState) {
+        const willOpen =
+          typeof forceState === "boolean"
+            ? forceState
+            : !mobileMenu.classList.contains("open");
+        mobileMenu.classList.toggle("open", willOpen);
+        hamburger.setAttribute("aria-expanded", String(willOpen));
+      }
+      function closeMobileMenu() {
+        toggleMobileMenu(false);
+      }
+      if (hamburger)
+        hamburger.addEventListener("click", () => toggleMobileMenu());
+      if (mobileMenu) {
+        mobileMenu.addEventListener("click", (e) => {
+          if (e.target === mobileMenu) closeMobileMenu();
+        });
+      }
+
+      // Mjuk scroll för ankare (inkl. logga->#top) + stäng mobilmeny efter klick
+      document.querySelectorAll('a[href^="#"]').forEach((a) => {
+        a.addEventListener("click", (e) => {
+          const id = a.getAttribute("href");
+          if (!id || id.length <= 1) return;
+          e.preventDefault();
+          closeMobileMenu();
+          const el = document.querySelector(id);
+          if (!el) return;
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              el.scrollIntoView({ behavior: "smooth", block: "start" });
+            });
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
